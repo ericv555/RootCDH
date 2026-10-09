@@ -1,0 +1,5 @@
+# Alive LED config
+CONFIG_BLINK_LED_STRIP=y
+CONFIG_BLINK_GPIO=38
+CONFIG_BLINK_PERIOD=1000
+# other defines as needed go here
