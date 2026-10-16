@@ -28,17 +28,15 @@ static void blink_led(void)
 static void configure_led(void)
 {
     /* LED strip initialization with the GPIO and pixels number*/
-    led_strip_config_t strip_config = {
-        .strip_gpio_num = BLINK_GPIO,
-        .max_leds = 1,
-    };
-    led_strip_rmt_config_t rmt_config = {
-        .resolution_hz = 10 * 1000 * 1000, // 10MHz
-        .flags.with_dma = false,
-    };
+    led_strip_config_t strip_config{};
+    strip_config.strip_gpio_num = BLINK_GPIO;
+    strip_config.max_leds = 1;
+    led_strip_rmt_config_t rmt_config{};
+    rmt_config.resolution_hz = 10 * 1000 * 1000; // 10MHz
+    rmt_config.flags.with_dma = false;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 }
-void app_main(void)
+extern "C" void app_main(void)
 {
     // Configure the LED
     configure_led();
