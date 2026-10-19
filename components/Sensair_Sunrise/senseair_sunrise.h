@@ -1,32 +1,27 @@
-/*
+/**
  *******************************************************************************
  * @copyright   Copyright (C) by SenseAir AB. All rights reserved.
  * @file        senseair_sunrise.h
- * @brief       Public API for the Sunrise/Sunlight and S12 CO2 sensor library:
-class hierarchy,
- *              configuration/measurement structs, error codes, and
-register/bitmask definitions.
- *              Implements the "Modbus on Senseair Sunrise" and "I2C on Senseair
-Sunrise"
+ * @brief       Public API for the Sunrise/Sunlight and S12 CO2 sensor library: class hierarchy,
+ *              configuration/measurement structs, error codes, and register/bitmask definitions.
+ *              Implements the "Modbus on Senseair Sunrise" and "I2C on Senseair Sunrise"
  *              documentation (available on the www.senseair.com website).
  * @details     Tested on Arduino Mega 2560, Arduino Nano 33 BLE
  *
  * @author      Senseair FW team
  * @version     1.0.0
  * @date        2026-06-01
- *******************************************************************************
- * Modified for use with esp32-s3																				
+ *
  *******************************************************************************
  */
 
 #ifndef SENSEAIRSUNRISE_H
 #define SENSEAIRSUNRISE_H
 
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include "driver/i2c_master.h"
-    
+#include <Arduino.h>
+#include <Stream.h>
+#include <Wire.h>
+
 /** @name Communication settings */
 /** @{ */
 constexpr int      SUNRISE_MODBUS_BAUDRATE       = 9600;    /**< Modbus baud rate (9600 only). */
@@ -128,9 +123,9 @@ struct SunriseExtendedConfiguration
 /** @brief Device identification data (Modbus Device ID objects 0x00–0x02). */
 struct SunriseIdentification
 {
-    std::string vendorName;     /**< Object 0x00: Vendor name (e.g. "Senseair"). */
-    std::string productCode;    /**< Object 0x01: Product code / article number. */
-    std::string majMinRevision; /**< Object 0x02: Major.Minor firmware revision. */
+    String vendorName;     /**< Object 0x00: Vendor name (e.g. "Senseair"). */
+    String productCode;    /**< Object 0x01: Product code / article number. */
+    String majMinRevision; /**< Object 0x02: Major.Minor firmware revision. */
 };
 
 /** @brief Measurement result from the sensor. */
@@ -256,7 +251,7 @@ public:
     void setAddress(uint8_t address) override;
 
     /** @brief Read a Modbus Device Identification object (function code 0x2B). */
-    SunriseError readIdentObject(uint8_t objId, std::string& objValue);
+    SunriseError readIdentObject(uint8_t objId, String& objValue);
 
     /** @brief Read all Device Identification objects (vendor, product code, revision) into @p ident. */
     SunriseError readIdentification(SunriseIdentification& ident);
@@ -354,7 +349,7 @@ public:
     void disable();
 
     /** @brief Convert a SunriseError to a human-readable String for diagnostics. */
-    static std::string evaluateError(SunriseError error, const char* currentAction);
+    static String evaluateError(SunriseError error, const char* currentAction);
 
     /** @brief Extract ABC time (hours) from a saved single-mode state. */
     static uint16_t getABCTimeFromState(const SunriseSingleModeState& sunriseState);

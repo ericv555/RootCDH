@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "led_strip.h"
 #include "sdkconfig.h"
+#include "Arduino.h"
 
 #define BLINK_GPIO CONFIG_BLINK_GPIO
 #define BLINK_PERIOD CONFIG_BLINK_PERIOD
@@ -36,8 +37,8 @@ static void configure_led(void)
     rmt_config.flags.with_dma = false;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 }
-extern "C" void app_main(void)
-{
+extern "C" void app_main(void) {
+	initArduino();
     // Configure the LED
     configure_led();
 
@@ -46,5 +47,6 @@ extern "C" void app_main(void)
         /* Toggle the LED state */
         s_led_state = !s_led_state;
         vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS);
+        
     }
 }
