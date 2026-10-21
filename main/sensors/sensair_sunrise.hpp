@@ -5,5 +5,5 @@ class SunriseSensor {
 public:
 	void read();
     void init();
-
+    void send_to_comms();
 };
