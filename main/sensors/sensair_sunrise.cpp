@@ -1,6 +1,6 @@
 #include "sensair_sunrise.hpp"
 
-void Sunrise::init() {
+void SunriseSensor::init() {
 
 
 }

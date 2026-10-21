@@ -10,3 +10,4 @@ dependencies.lock
 .dir-locals.el
 compile_commands.json
 *~
+eim_config.toml
