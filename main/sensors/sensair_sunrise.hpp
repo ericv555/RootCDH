@@ -1,9 +1,10 @@
 #pragma once
 #include "senseair_sunrise.h"
+#include "sensor.hpp"
 
-class SunriseSensor {
+class SunriseSensor : public Sensor{
 public:
-	void read();
-    void init();
-    void send_to_comms();
+	void read() override;
+    void init() override;
+    void send_to_comms() override;
 };
