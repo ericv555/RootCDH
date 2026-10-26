@@ -1,6 +1,7 @@
 #pragma once
 #include "senseair_sunrise.h"
 #include "sensor.hpp"
+#include "Wire.h"
 
 class SunriseSensor : public Sensor{
 public:

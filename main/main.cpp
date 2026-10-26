@@ -13,15 +13,21 @@
 #define BLINK_PERIOD CONFIG_BLINK_PERIOD
 // Set I2C addresses
 constexpr uint8_t SUNRISE_ADDR_1 = 0x68U;
-constexpr uint8_t SUNRISE_ADDR_2 = 0x69U;
 /* Pin to enable/disable sensor */
-constexpr int SUNRISE_EN_PIN = 5;
+constexpr int SUNRISE_EN_PIN_1 = 5;
 /* Pin to select communication protocol (COMSEL): LOW = I2C, HIGH = Modbus */
-constexpr int SUNRISE_COMSEL_PIN = 4;
+constexpr int SUNRISE_COMSEL_PIN_1 = 4;
 /* Pin to read nRDY signal state */
-constexpr int SUNRISE_NRDY = 7;
+constexpr int SUNRISE_NRDY_1 = 7;
 static uint8_t s_led_state = 0;
 static led_strip_handle_t led_strip;
+
+struct SunriseTaskConfig {
+    uint8_t address;
+    int enablePin;
+    int nrdyPin;
+    int comselPin;
+};
 
 static void blink_led(void)
 {
@@ -47,13 +53,13 @@ static void configure_led(void)
     rmt_config.flags.with_dma = false;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 }
-static void sunrise_task(void*)
-{
-    SunriseSensor sunrise;
+static void sunrise_task(void * parameter) {
+	const auto& config = *static_cast<const SunriseTaskConfig*>(parameter);
+    SunriseSensor sunrise(Wire, config.address, config.enablePin,
+                          config.nrdyPin,config.comselPin);
     sunrise.init();
 
-    const TickType_t period =
-        pdMS_TO_TICKS(sunrise.measurementPeriodMs());
+    const TickType_t period = pdMS_TO_TICKS(sunrise.measurementPeriodMs());
     TickType_t lastWake = xTaskGetTickCount();
 
     while (true) {
@@ -79,8 +85,14 @@ extern "C" void app_main(void) {
 	// Begin I2C
     Wire.begin();
     Wire.setClock(SUNRISE_I2C_CLOCK_HZ);
+    static SunriseTaskConfig sunrise1Config{
+    SUNRISE_ADDR_1,
+    SUNRISE_EN_PIN_1,
+    SUNRISE_NRDY_1,
+    SUNRISE_COMSEL_PIN_1
+};
 	// Task Creation
-    xTaskCreate(sunrise_task, "sunrise", 4096, nullptr, 1, nullptr);
+    xTaskCreate(sunrise_task, "sunrise1", 4096, &sunrise1Config, 1, nullptr);
     xTaskCreate(blink_task,"blink",4096,nullptr,1,nullptr);
 
 }
