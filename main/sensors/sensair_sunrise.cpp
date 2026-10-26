@@ -8,11 +8,6 @@ static constexpr char TAG[] = "sunrise";
 constexpr MeasurementMode MEASUREMENT_MODE     = MeasurementMode::CONTINUOUS;
 constexpr uint16_t        MEASUREMENT_PERIOD_S = 16u;
 constexpr uint16_t        MEASUREMENT_SAMPLES  = 8u;
-/* Hardware configuration */
-/* Sensor communication address, use 0xFE if address is unknown and only one sensor on the bus */
-
-/* Logging interval for sensor */
-static unsigned long sunriseMeasurementPeriodMs = MEASUREMENT_PERIOD_S * 1000U;
 
 static SunriseSingleModeState sunriseState;
 
