@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "main.cpp"
+    SRCS "main.cpp" "sensors/BME280.cpp"
     INCLUDE_DIRS "."
-    REQUIRES espressif__arduino-esp32
+    REQUIRES BME280 espressif__arduino-esp32
 )
