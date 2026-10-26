@@ -10,26 +10,14 @@ constexpr uint16_t        MEASUREMENT_PERIOD_S = 16u;
 constexpr uint16_t        MEASUREMENT_SAMPLES  = 8u;
 /* Hardware configuration */
 /* Sensor communication address, use 0xFE if address is unknown and only one sensor on the bus */
-constexpr uint8_t SUNRISE_ADDR = SUNRISE_DEFAULT_COMM_ADDRESS;
-/* Pin to enable/disable sensor */
-constexpr int SUNRISE_EN_PIN = 5;
-/* Pin to select communication protocol (COMSEL): LOW = I2C, HIGH = Modbus */
-constexpr int SUNRISE_COMSEL_PIN = 4;
-/* Pin to read nRDY signal state */
-constexpr int SUNRISE_NRDY = 7;
-// Setup 
-/* Global constant used to keep track of hour interval */
-constexpr unsigned long HOUR_INTERVAL_MS = 3600000ul;
 
-/* Global parameters */
-static unsigned long measurementTimeStamp = 0ul;
 /* Logging interval for sensor */
 static unsigned long sunriseMeasurementPeriodMs = MEASUREMENT_PERIOD_S * 1000U;
 
 static SunriseSingleModeState sunriseState;
 
-SunriseSensor::SunriseSensor()
-: sensor(Wire, SUNRISE_ADDR, SUNRISE_EN_PIN, SUNRISE_NRDY) {}
+SunriseSensor::SunriseSensor(TwoWire &bus, uint8_t address, int enablePin, int nrdyPin, int comselPin)
+: comselPin_(comselPin), sensor(bus, address, enablePin, nrdyPin){}
 uint32_t SunriseSensor::measurementPeriodMs() const {
     return MEASUREMENT_PERIOD_S * 1000U;
 }
@@ -62,11 +50,8 @@ void SunriseSensor::printErrorStatus(uint16_t errorStatus) {
 }
 void SunriseSensor::init() {
 	// Set I2C pin
-    pinMode(SUNRISE_COMSEL_PIN, OUTPUT);
-    digitalWrite(SUNRISE_COMSEL_PIN, LOW);
-    // Begin I2C
-    Wire.begin();
-    Wire.setClock(SUNRISE_I2C_CLOCK_HZ);
+    pinMode(comselPin_, OUTPUT);
+    digitalWrite(comselPin_, LOW);
     // Begin sensor
     sensor.begin();
     sensor.disable();
@@ -96,15 +81,13 @@ void SunriseSensor::init() {
 	if (needsUpdate) {
 		error = sensor.setSensorConfig(desired);
 		if (error != SunriseError::NO_ERROR) {
-			ESP_LOGE(TAG, "Failed to write sensor configuration: %d",
-					 static_cast<int>(error));
+			ESP_LOGE(TAG, "Failed to write sensor configuration: %d", static_cast<int>(error));
 			return;
 		}
 
 		error = sensor.resetBySCR();
 		if (error != SunriseError::NO_ERROR) {
-			ESP_LOGE(TAG, "Failed to reset sensor: %d",
-					 static_cast<int>(error));
+			ESP_LOGE(TAG, "Failed to reset sensor: %d", static_cast<int>(error));
 			return;
 		}
 
@@ -129,9 +112,9 @@ void SunriseSensor::read() {
 		printErrorStatus(sunriseMeasurement.errorStatus);
 		return;
     }
-
+	ESP_LOGI(TAG, "CO2: %d ppm, Temp: %d oC",sunriseMeasurement.co2value,sunriseMeasurement.temperature);
 
 }
 void SunriseSensor::send_to_comms() {
-
+	
 }

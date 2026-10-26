@@ -4,13 +4,15 @@
 
 class SunriseSensor : public Sensor{
 public:
-	SunriseSensor();
+	SunriseSensor(TwoWire &bus, uint8_t address, int enablePin, int nrdyPin,
+                  int comselPin);
 	void read() override;
     void init() override;
     void send_to_comms() override;
     void printErrorStatus(uint16_t errorStatus);
 	uint32_t measurementPeriodMs() const;
 private:
-    SunriseError error;
+	SunriseError error;
+	int comselPin_;
     SunriseI2C sensor;
 };

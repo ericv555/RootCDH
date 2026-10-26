@@ -11,7 +11,15 @@
 
 #define BLINK_GPIO CONFIG_BLINK_GPIO
 #define BLINK_PERIOD CONFIG_BLINK_PERIOD
-
+// Set I2C addresses
+constexpr uint8_t SUNRISE_ADDR_1 = 0x68U;
+constexpr uint8_t SUNRISE_ADDR_2 = 0x69U;
+/* Pin to enable/disable sensor */
+constexpr int SUNRISE_EN_PIN = 5;
+/* Pin to select communication protocol (COMSEL): LOW = I2C, HIGH = Modbus */
+constexpr int SUNRISE_COMSEL_PIN = 4;
+/* Pin to read nRDY signal state */
+constexpr int SUNRISE_NRDY = 7;
 static uint8_t s_led_state = 0;
 static led_strip_handle_t led_strip;
 
@@ -53,21 +61,26 @@ static void sunrise_task(void*)
         sunrise.read();
     }
 }
-extern "C" void app_main(void) {
-	// Enable all arduino functionality
-	initArduino();
-	
-	// Task Creation
-    xTaskCreate(sunrise_task, "sunrise", 4096, nullptr, 1, nullptr);
-    
+static void blink_task(void*) {
     // Configure the LED
     configure_led();
     
-    while (1) {
+    while (true) {
         blink_led();
         /* Toggle the LED state */
         s_led_state = !s_led_state;
         vTaskDelay(BLINK_PERIOD / portTICK_PERIOD_MS);
         
     }
+}
+extern "C" void app_main(void) {
+	// Enable all arduino functionality
+	initArduino();
+	// Begin I2C
+    Wire.begin();
+    Wire.setClock(SUNRISE_I2C_CLOCK_HZ);
+	// Task Creation
+    xTaskCreate(sunrise_task, "sunrise", 4096, nullptr, 1, nullptr);
+    xTaskCreate(blink_task,"blink",4096,nullptr,1,nullptr);
+
 }
