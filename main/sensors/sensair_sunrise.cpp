@@ -107,9 +107,15 @@ void SunriseSensor::read() {
 		printErrorStatus(sunriseMeasurement.errorStatus);
 		return;
     }
-	ESP_LOGI(TAG, "CO2: %d ppm, Temp: %d oC",sunriseMeasurement.co2value,sunriseMeasurement.temperature);
-
+    CO2_reading = sunriseMeasurement.co2value;
+    temp = static_cast<float>(sunriseMeasurement.temperature)/100.0f;
+	ESP_LOGI(TAG, "CO2: %d ppm, Temp: %f oC",CO2_reading,temp);
+	
 }
+
 void SunriseSensor::send_to_comms() {
 	
 }
+int16_t SunriseSensor::get_CO2() { return CO2_reading; }
+float SunriseSensor::get_temp() { return temp; }
+
