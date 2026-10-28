@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "main.cpp"
+    SRCS "main.cpp" "sensors/DFRobot_Oxygen.cpp"
     INCLUDE_DIRS "."
-    REQUIRES espressif__arduino-esp32
+    REQUIRES DFRobot_OxygenSensor espressif__arduino-esp32
 )

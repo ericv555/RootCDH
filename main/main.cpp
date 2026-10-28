@@ -7,6 +7,8 @@
 #include "sdkconfig.h"
 #include "Arduino.h"
 
+#include "sensors/DFRobot_Oxygen.hpp"
+
 #define BLINK_GPIO CONFIG_BLINK_GPIO
 #define BLINK_PERIOD CONFIG_BLINK_PERIOD
 
@@ -37,9 +39,28 @@ static void configure_led(void)
     rmt_config.flags.with_dma = false;
     ESP_ERROR_CHECK(led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
 }
+static void oxygen_task(void*)
+{
+    DfRobotOxygenSensor oxygen;
+    oxygen.init();
+
+    const TickType_t period =
+        pdMS_TO_TICKS(oxygen.measurementPeriodMs());
+    TickType_t lastWake = xTaskGetTickCount();
+
+    while (true) {
+        xTaskDelayUntil(&lastWake, period);
+        oxygen.read();
+    }
+}
 extern "C" void app_main(void) {
+	// Enable all arduino functionality
 	initArduino();
-	// Configure the LED
+
+	// Task Creation
+    xTaskCreate(oxygen_task, "oxygen", 4096, nullptr, 1, nullptr);
+
+    // Configure the LED
     configure_led();
 
     while (1) {
